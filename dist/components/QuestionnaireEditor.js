@@ -64,20 +64,70 @@ const QuestionnaireEditor = ({ questionnaire }) => {
                 })
         }));
     };
-    const addLabel = (sectionId, questionId) => {
-        const label = prompt('Enter label to add');
-        if (!label)
-            return;
-        setDraft((prev) => ({
-            ...prev,
-            sections: prev.sections.map((s) => s.id !== sectionId
-                ? s
-                : {
-                    ...s,
-                    questions: s.questions.map((q) => q.id !== questionId ? q : { ...q, labels: [...(q.labels || []), label] })
-                })
-        }));
+    // Inline form state for small quick edits (add option, add label, edit logic)
+    const [inlineForm, setInlineForm] = (0, react_1.useState)(null);
+    const openAddLabel = (sectionId, questionId) => {
+        setInlineForm({ type: 'addLabel', sectionId, questionId, label: '' });
     };
+    const openAddOption = (sectionId, questionId) => {
+        setInlineForm({ type: 'addOption', sectionId, questionId, label: '', value: '' });
+    };
+    const openEditLogic = (sectionId, questionId) => {
+        setInlineForm({ type: 'editLogic', sectionId, questionId, condition: '' });
+    };
+    const submitInlineForm = () => {
+        if (!inlineForm)
+            return;
+        if (inlineForm.type === 'addLabel') {
+            const { sectionId, questionId, label } = inlineForm;
+            if (!label)
+                return setInlineForm(null);
+            setDraft((prev) => ({
+                ...prev,
+                sections: prev.sections.map((s) => s.id !== sectionId
+                    ? s
+                    : {
+                        ...s,
+                        questions: s.questions.map((q) => q.id !== questionId ? q : { ...q, labels: [...(q.labels || []), label] })
+                    })
+            }));
+        }
+        else if (inlineForm.type === 'addOption') {
+            const { sectionId, questionId, label, value } = inlineForm;
+            if (!label)
+                return setInlineForm(null);
+            const val = value || `${Date.now()}`;
+            setDraft((prev) => ({
+                ...prev,
+                sections: prev.sections.map((s) => s.id !== sectionId
+                    ? s
+                    : {
+                        ...s,
+                        questions: s.questions.map((q) => q.id !== questionId
+                            ? q
+                            : { ...q, options: [...(q.options || []), { label, value: val }] })
+                    })
+            }));
+        }
+        else if (inlineForm.type === 'editLogic') {
+            const { sectionId, questionId, condition } = inlineForm;
+            if (!condition)
+                return setInlineForm(null);
+            setDraft((prev) => ({
+                ...prev,
+                sections: prev.sections.map((s) => s.id !== sectionId
+                    ? s
+                    : {
+                        ...s,
+                        questions: s.questions.map((q) => q.id !== questionId
+                            ? q
+                            : { ...q, logic: [...(q.logic || []), { type: 'RouteTo', condition, targetId: '' }] })
+                    })
+            }));
+        }
+        setInlineForm(null);
+    };
+    const cancelInlineForm = () => setInlineForm(null);
     const editLogic = (sectionId, questionId) => {
         const condition = prompt('Enter simple condition (e.g., Q1_response_value == "B")');
         if (!condition)
@@ -139,22 +189,6 @@ const QuestionnaireEditor = ({ questionnaire }) => {
                                                                         : { ...q, options: q.options?.filter((_, i) => i !== idx) })
                                                                 })
                                                         }));
-                                                    }, children: "Remove" })] }, opt.value))), (0, jsx_runtime_1.jsx)("div", { style: { marginTop: '0.5em' }, children: (0, jsx_runtime_1.jsx)("button", { onClick: () => {
-                                                    const label = prompt('Option label');
-                                                    const value = prompt('Option value') || `${Date.now()}`;
-                                                    if (!label)
-                                                        return;
-                                                    setDraft((prev) => ({
-                                                        ...prev,
-                                                        sections: prev.sections.map((s) => s.id !== section.id
-                                                            ? s
-                                                            : {
-                                                                ...s,
-                                                                questions: s.questions.map((q) => q.id !== question.id
-                                                                    ? q
-                                                                    : { ...q, options: [...(q.options || []), { label, value }] })
-                                                            })
-                                                    }));
-                                                }, children: "Add Option" }) })] })), (0, jsx_runtime_1.jsxs)("div", { style: { marginTop: '0.5em' }, children: [(0, jsx_runtime_1.jsx)("button", { onClick: () => editLogic(section.id, question.id), children: "Edit Logic" }), (0, jsx_runtime_1.jsx)("button", { onClick: () => addLabel(section.id, question.id), children: "Add Label" }), (0, jsx_runtime_1.jsx)("button", { onClick: () => toggleCommentArea(section.id, question.id), children: question.commentArea ? 'Disable Comment Area' : 'Enable Comment Area' })] })] }, question.id)))] }, section.id))) }), (0, jsx_runtime_1.jsx)("button", { onClick: saveDraft, disabled: loading, children: loading ? 'Saving...' : 'Save Draft' })] }));
+                                                    }, children: "Remove" })] }, opt.value))), (0, jsx_runtime_1.jsx)("div", { style: { marginTop: '0.5em' }, children: (0, jsx_runtime_1.jsx)("button", { onClick: () => openAddOption(section.id, question.id), children: "Add Option" }) })] })), (0, jsx_runtime_1.jsxs)("div", { style: { marginTop: '0.5em' }, children: [(0, jsx_runtime_1.jsx)("button", { onClick: () => openEditLogic(section.id, question.id), children: "Edit Logic" }), (0, jsx_runtime_1.jsx)("button", { onClick: () => openAddLabel(section.id, question.id), children: "Add Label" }), (0, jsx_runtime_1.jsx)("button", { onClick: () => toggleCommentArea(section.id, question.id), children: question.commentArea ? 'Disable Comment Area' : 'Enable Comment Area' })] }), inlineForm && inlineForm.sectionId === section.id && inlineForm.questionId === question.id && ((0, jsx_runtime_1.jsxs)("div", { style: { marginTop: '0.5em', padding: '0.5em', background: '#f9f9f9' }, children: [inlineForm.type === 'addLabel' && ((0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("input", { placeholder: "Label", value: inlineForm.label, onChange: (e) => setInlineForm({ ...inlineForm, label: e.target.value }) }), (0, jsx_runtime_1.jsx)("button", { onClick: submitInlineForm, children: "Add" }), (0, jsx_runtime_1.jsx)("button", { onClick: cancelInlineForm, children: "Cancel" })] })), inlineForm.type === 'addOption' && ((0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("input", { placeholder: "Option label", value: inlineForm.label, onChange: (e) => setInlineForm({ ...inlineForm, label: e.target.value }) }), (0, jsx_runtime_1.jsx)("input", { placeholder: "Option value (optional)", value: inlineForm.value, onChange: (e) => setInlineForm({ ...inlineForm, value: e.target.value }) }), (0, jsx_runtime_1.jsx)("button", { onClick: submitInlineForm, children: "Add" }), (0, jsx_runtime_1.jsx)("button", { onClick: cancelInlineForm, children: "Cancel" })] })), inlineForm.type === 'editLogic' && ((0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("input", { placeholder: 'Condition, e.g. Q1_response_value == "B"', value: inlineForm.condition, onChange: (e) => setInlineForm({ ...inlineForm, condition: e.target.value }), style: { width: '70%' } }), (0, jsx_runtime_1.jsx)("button", { onClick: submitInlineForm, children: "Add" }), (0, jsx_runtime_1.jsx)("button", { onClick: cancelInlineForm, children: "Cancel" })] }))] }))] }, question.id)))] }, section.id))) }), (0, jsx_runtime_1.jsx)("button", { onClick: saveDraft, disabled: loading, children: loading ? 'Saving...' : 'Save Draft' })] }));
 };
 exports.QuestionnaireEditor = QuestionnaireEditor;

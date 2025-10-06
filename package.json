@@ -8,6 +8,7 @@
     "build": "tsc -p .",
   "test": "jest --runInBand",
   "test:server-endpoint": "jest tests/server.endpoints.test.ts -i",
+  "frontend:dev": "(cd frontend && npm install && npm run dev)",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init"
   },

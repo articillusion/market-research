@@ -76,23 +76,86 @@ export const QuestionnaireEditor: React.FC<QuestionnaireEditorProps> = ({ questi
     }));
   };
 
-  const addLabel = (sectionId: string, questionId: string) => {
-    const label = prompt('Enter label to add');
-    if (!label) return;
-    setDraft((prev) => ({
-      ...prev,
-      sections: prev.sections.map((s) =>
-        s.id !== sectionId
-          ? s
-          : {
-              ...s,
-              questions: s.questions.map((q) =>
-                q.id !== questionId ? q : { ...q, labels: [...(q.labels || []), label] }
-              )
-            }
-      )
-    }));
+  // Inline form state for small quick edits (add option, add label, edit logic)
+  const [inlineForm, setInlineForm] = useState<
+    | { type: 'addOption'; sectionId: string; questionId: string; label: string; value: string }
+    | { type: 'addLabel'; sectionId: string; questionId: string; label: string }
+    | { type: 'editLogic'; sectionId: string; questionId: string; condition: string }
+    | null
+  >(null);
+
+  const openAddLabel = (sectionId: string, questionId: string) => {
+    setInlineForm({ type: 'addLabel', sectionId, questionId, label: '' });
   };
+
+  const openAddOption = (sectionId: string, questionId: string) => {
+    setInlineForm({ type: 'addOption', sectionId, questionId, label: '', value: '' });
+  };
+
+  const openEditLogic = (sectionId: string, questionId: string) => {
+    setInlineForm({ type: 'editLogic', sectionId, questionId, condition: '' });
+  };
+
+  const submitInlineForm = () => {
+    if (!inlineForm) return;
+    if (inlineForm.type === 'addLabel') {
+      const { sectionId, questionId, label } = inlineForm;
+      if (!label) return setInlineForm(null);
+      setDraft((prev) => ({
+        ...prev,
+        sections: prev.sections.map((s) =>
+          s.id !== sectionId
+            ? s
+            : {
+                ...s,
+                questions: s.questions.map((q) =>
+                  q.id !== questionId ? q : { ...q, labels: [...(q.labels || []), label] }
+                )
+              }
+        )
+      }));
+    } else if (inlineForm.type === 'addOption') {
+      const { sectionId, questionId, label, value } = inlineForm;
+      if (!label) return setInlineForm(null);
+      const val = value || `${Date.now()}`;
+      setDraft((prev) => ({
+        ...prev,
+        sections: prev.sections.map((s) =>
+          s.id !== sectionId
+            ? s
+            : {
+                ...s,
+                questions: s.questions.map((q) =>
+                  q.id !== questionId
+                    ? q
+                    : { ...q, options: [...(q.options || []), { label, value: val }] }
+                )
+              }
+        )
+      }));
+    } else if (inlineForm.type === 'editLogic') {
+      const { sectionId, questionId, condition } = inlineForm;
+      if (!condition) return setInlineForm(null);
+      setDraft((prev) => ({
+        ...prev,
+        sections: prev.sections.map((s) =>
+          s.id !== sectionId
+            ? s
+            : {
+                ...s,
+                questions: s.questions.map((q) =>
+                  q.id !== questionId
+                    ? q
+                    : { ...q, logic: [...(q.logic || []), { type: 'RouteTo', condition, targetId: '' }] }
+                )
+              }
+        )
+      }));
+    }
+    setInlineForm(null);
+  };
+
+  const cancelInlineForm = () => setInlineForm(null);
 
   const editLogic = (sectionId: string, questionId: string) => {
     const condition = prompt('Enter simple condition (e.g., Q1_response_value == "B")');
@@ -214,42 +277,63 @@ export const QuestionnaireEditor: React.FC<QuestionnaireEditorProps> = ({ questi
                       </div>
                     ))}
                     <div style={{ marginTop: '0.5em' }}>
-                      <button
-                        onClick={() => {
-                          const label = prompt('Option label');
-                          const value = prompt('Option value') || `${Date.now()}`;
-                          if (!label) return;
-                          setDraft((prev) => ({
-                            ...prev,
-                            sections: prev.sections.map((s) =>
-                              s.id !== section.id
-                                ? s
-                                : {
-                                    ...s,
-                                    questions: s.questions.map((q) =>
-                                      q.id !== question.id
-                                        ? q
-                                        : { ...q, options: [...(q.options || []), { label, value }] }
-                                    )
-                                  }
-                            )
-                          }));
-                        }}
-                      >
-                        Add Option
-                      </button>
+                      <button onClick={() => openAddOption(section.id, question.id)}>Add Option</button>
                     </div>
                   </div>
                 )}
 
                 {/* Placeholders for editing logic, labels, and comment area toggle */}
                 <div style={{ marginTop: '0.5em' }}>
-                  <button onClick={() => editLogic(section.id, question.id)}>Edit Logic</button>
-                  <button onClick={() => addLabel(section.id, question.id)}>Add Label</button>
+                  <button onClick={() => openEditLogic(section.id, question.id)}>Edit Logic</button>
+                  <button onClick={() => openAddLabel(section.id, question.id)}>Add Label</button>
                   <button onClick={() => toggleCommentArea(section.id, question.id)}>
                     {question.commentArea ? 'Disable Comment Area' : 'Enable Comment Area'}
                   </button>
                 </div>
+                {/* Inline small form area */}
+                {inlineForm && inlineForm.sectionId === section.id && inlineForm.questionId === question.id && (
+                  <div style={{ marginTop: '0.5em', padding: '0.5em', background: '#f9f9f9' }}>
+                    {inlineForm.type === 'addLabel' && (
+                      <div>
+                        <input
+                          placeholder="Label"
+                          value={inlineForm.label}
+                          onChange={(e) => setInlineForm({ ...inlineForm, label: e.target.value } as any)}
+                        />
+                        <button onClick={submitInlineForm}>Add</button>
+                        <button onClick={cancelInlineForm}>Cancel</button>
+                      </div>
+                    )}
+                    {inlineForm.type === 'addOption' && (
+                      <div>
+                        <input
+                          placeholder="Option label"
+                          value={inlineForm.label}
+                          onChange={(e) => setInlineForm({ ...inlineForm, label: e.target.value } as any)}
+                        />
+                        <input
+                          placeholder="Option value (optional)"
+                          value={inlineForm.value}
+                          onChange={(e) => setInlineForm({ ...inlineForm, value: e.target.value } as any)}
+                        />
+                        <button onClick={submitInlineForm}>Add</button>
+                        <button onClick={cancelInlineForm}>Cancel</button>
+                      </div>
+                    )}
+                    {inlineForm.type === 'editLogic' && (
+                      <div>
+                        <input
+                          placeholder='Condition, e.g. Q1_response_value == "B"'
+                          value={inlineForm.condition}
+                          onChange={(e) => setInlineForm({ ...inlineForm, condition: e.target.value } as any)}
+                          style={{ width: '70%' }}
+                        />
+                        <button onClick={submitInlineForm}>Add</button>
+                        <button onClick={cancelInlineForm}>Cancel</button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </section>
