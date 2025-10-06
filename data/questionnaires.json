@@ -1,0 +1,152 @@
+{
+  "mock-1759704000993": {
+    "id": "mock-1759704000993",
+    "title": "Sample Questionnaire",
+    "clientName": "Sample Client",
+    "fieldworkMarket": [
+      "US",
+      "UK"
+    ],
+    "comissionMarket": [
+      "US"
+    ],
+    "language": "en-US",
+    "status": "AI_Pending",
+    "createdAt": "2025-10-05T22:40:00.993Z",
+    "createdByUserId": "flow-user",
+    "sections": [
+      {
+        "id": "section-1",
+        "title": "Screening",
+        "questions": [
+          {
+            "id": "Q-1759704000993-1",
+            "type": "ScreenOut",
+            "text": "Are you over 18 years old?",
+            "options": [
+              {
+                "label": "Yes",
+                "value": "yes"
+              },
+              {
+                "label": "No",
+                "value": "no"
+              }
+            ],
+            "logic": [
+              {
+                "type": "ScreenOut",
+                "condition": "Q1_response_value == 'no'",
+                "targetId": "ScreenOut_Under18"
+              }
+            ],
+            "labels": [
+              "age",
+              "screenout"
+            ],
+            "commentArea": false
+          },
+          {
+            "id": "Q-1759704000993-2",
+            "type": "SingleChoice",
+            "text": "Which brand do you prefer for mobile phones?",
+            "options": [
+              {
+                "label": "Brand A",
+                "value": "A"
+              },
+              {
+                "label": "Brand B",
+                "value": "B"
+              },
+              {
+                "label": "Other",
+                "value": "Other"
+              }
+            ],
+            "logic": [],
+            "labels": [
+              "brand_preference"
+            ],
+            "commentArea": true
+          }
+        ]
+      }
+    ]
+  },
+  "mock-1759738996576": {
+    "id": "mock-1759738996576",
+    "title": "Sample Questionnaire",
+    "clientName": "Sample Client",
+    "fieldworkMarket": [
+      "US",
+      "UK"
+    ],
+    "comissionMarket": [
+      "US"
+    ],
+    "language": "en-US",
+    "status": "AI_Pending",
+    "createdAt": "2025-10-06T08:23:16.576Z",
+    "createdByUserId": "flow-user",
+    "sections": [
+      {
+        "id": "section-1",
+        "title": "Screening",
+        "questions": [
+          {
+            "id": "Q-1759738996576-1",
+            "type": "ScreenOut",
+            "text": "Are you over 18 years old?",
+            "options": [
+              {
+                "label": "Yes",
+                "value": "yes"
+              },
+              {
+                "label": "No",
+                "value": "no"
+              }
+            ],
+            "logic": [
+              {
+                "type": "ScreenOut",
+                "condition": "Q1_response_value == 'no'",
+                "targetId": "ScreenOut_Under18"
+              }
+            ],
+            "labels": [
+              "age",
+              "screenout"
+            ],
+            "commentArea": false
+          },
+          {
+            "id": "Q-1759738996576-2",
+            "type": "SingleChoice",
+            "text": "Which brand do you prefer for mobile phones?",
+            "options": [
+              {
+                "label": "Brand A",
+                "value": "A"
+              },
+              {
+                "label": "Brand B",
+                "value": "B"
+              },
+              {
+                "label": "Other",
+                "value": "Other"
+              }
+            ],
+            "logic": [],
+            "labels": [
+              "brand_preference"
+            ],
+            "commentArea": true
+          }
+        ]
+      }
+    ]
+  }
+}
