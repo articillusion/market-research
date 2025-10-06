@@ -6,7 +6,8 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server/index.ts",
     "start": "node dist/index.js",
     "build": "tsc -p .",
-    "test": "jest --runInBand",
+  "test": "jest --runInBand",
+  "test:server-endpoint": "jest tests/server.endpoints.test.ts -i",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init"
   },
