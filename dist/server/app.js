@@ -63,3 +63,7 @@ app.get('/api/questionnaire/:id', async (req, res) => {
     }
 });
 exports.default = app;
+// Also expose CommonJS export for environments that require it
+// (some test runners or scripts may use require(...) to load this file)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+module.exports = app;
